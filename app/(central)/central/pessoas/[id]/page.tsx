@@ -42,7 +42,7 @@ type Record_ = {
   } | null;
   neighborhood: string | null;
   assigned_name: string | null;
-  children: { age_band: string }[];
+  children: { id: string; age_band: string }[];
   needs: { id: string; need_type: string; item_code: string | null; raw_text: string | null; status: string }[];
   consents: {
     purpose: string;

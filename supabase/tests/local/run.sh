@@ -17,7 +17,8 @@ for t in supabase/tests/*.sql; do
   [ -e "$t" ] || continue
   echo "== test $t"
   out=$(psql -d "$DB" -v ON_ERROR_STOP=1 -X -q -t -A -f "$t" 2>&1) || { echo "$out"; fail=1; continue; }
-  echo "$out" | grep -E '^(not ok|# )' && fail=1 || true
+  echo "$out" | grep -E '^(not ok|# Looks like)' && fail=1 || true
+  echo "$out" | grep -E '^# ' | grep -v '^# Looks like' || true
   echo "$out" | grep -cE '^ok ' | sed 's/^/   ok: /'
 done
 [ "$fail" -eq 0 ] && echo "ALL GREEN" || { echo "FAILURES"; exit 1; }

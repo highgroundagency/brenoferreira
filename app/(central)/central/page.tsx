@@ -22,6 +22,21 @@ export default async function CentralPage() {
           <Link className="underline" href="/central/entregas">
             Entregas
           </Link>
+          <Link className="underline" href="/central/educacao">
+            Educação
+          </Link>
+          <Link className="underline" href="/central/trabalho">
+            Trabalho
+          </Link>
+          <Link className="underline" href="/central/igrejas">
+            Igrejas
+          </Link>
+          <Link className="underline" href="/central/estoque">
+            Estoque
+          </Link>
+          <Link className="underline" href="/central/impacto">
+            Impacto
+          </Link>
           <Link className="underline" href="/central/bairros">
             {t("central.neighborhoods")}
           </Link>
