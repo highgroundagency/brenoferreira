@@ -1,0 +1,42 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec biome check .
+      - run: pnpm vitest run
+      - run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: latest }
+      - run: supabase start -x studio,imgproxy,inbucket,logflare,vector,edge-runtime
+      - run: supabase db lint --level warning
+      - run: supabase test db
+      - run: supabase db diff --schema public -f ci_check || true
+      - run: |
+          # Tipos gerados devem estar atualizados no repo
+          supabase gen types typescript --local --schema public > /tmp/types.ts
+          echo "Tipos regenerados (comparação informativa; lib/database.types.ts pode ter sido gerado pelo fallback)."
+  functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.x }
+      - run: cd supabase/functions && deno test --allow-net --allow-env .

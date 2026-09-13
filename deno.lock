@@ -1,0 +1,53 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@std/assert@1": "1.0.19",
+    "jsr:@std/internal@^1.0.12": "1.0.14"
+  },
+  "jsr": {
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/internal@1.0.14": {
+      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@biomejs/biome@^2.5.13",
+        "npm:@hookform/resolvers@^5.9.1",
+        "npm:@playwright/test@^1.63.0",
+        "npm:@serwist/next@^9.5.12",
+        "npm:@supabase/ssr@~0.12.7",
+        "npm:@supabase/supabase-js@^2.116.0",
+        "npm:@tailwindcss/postcss@4",
+        "npm:@tanstack/react-table@^9.2.4",
+        "npm:@types/node@^22.20.2",
+        "npm:@types/react-dom@19",
+        "npm:@types/react@19",
+        "npm:@vitest/coverage-v8@5",
+        "npm:class-variance-authority@~0.7.1",
+        "npm:clsx@^2.1.1",
+        "npm:dexie@^4.4.6",
+        "npm:libphonenumber-js@^1.13.13",
+        "npm:lucide-react@^1.45.0",
+        "npm:next@15.5.25",
+        "npm:react-dom@19.1.0",
+        "npm:react-hook-form@^7.88.0",
+        "npm:react@19.1.0",
+        "npm:serwist@^9.5.12",
+        "npm:sonner@^2.0.8",
+        "npm:supabase@^2.117.0",
+        "npm:tailwind-merge@^3.7.0",
+        "npm:tailwindcss@4",
+        "npm:typescript@5",
+        "npm:vitest@5",
+        "npm:zod@^4.6.4"
+      ]
+    }
+  }
+}
