@@ -22,7 +22,7 @@ pnpm fn:serve                        # Edge Functions (whatsapp-send, whatsapp-w
 ```
 Usuários locais: `evangelist@test`, `central@test`, `basic_food@test`, `unit_admin@test`, `global_admin@test`, `central_teste@test` (unidade `teste`).
 
-Sem Docker: `supabase/tests/local/run.sh` valida migrations + seed + pgTAP em um Postgres 16 local (shim de auth/vault/cron/net) e `python3 scripts/gen-types.py > lib/database.types.ts` gera os tipos.
+Sem Docker: `supabase/local-harness/run.sh` valida migrations + seed + pgTAP em um Postgres 16 local (shim de auth/vault/cron/net) e `python3 scripts/gen-types.py > lib/database.types.ts` gera os tipos.
 
 ## Qualidade
 ```

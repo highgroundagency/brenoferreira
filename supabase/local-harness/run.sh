@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Valida migrations + seed + pgTAP em um Postgres local "puro" (sem Docker).
-# Uso: supabase/tests/local/run.sh [dbname]   (requer: psql como superusuário via PGUSER/PGHOST ou `su postgres`)
+# Uso: supabase/local-harness/run.sh [dbname]   (requer: psql como superusuário via PGUSER/PGHOST ou `su postgres`)
 set -euo pipefail
-cd "$(dirname "$0")/../../.."
+cd "$(dirname "$0")/../.."
 DB="${1:-transtornar_local}"
 PSQL="psql -v ON_ERROR_STOP=1 -q"
 $PSQL -d postgres -c "drop database if exists $DB" -c "create database $DB"
 $PSQL -d postgres -c "alter database $DB set search_path = public, extensions"
-$PSQL -d "$DB" -f supabase/tests/local/shim.sql
+$PSQL -d "$DB" -f supabase/local-harness/shim.sql
 for f in supabase/migrations/*.sql; do echo "== $f"; $PSQL -d "$DB" -f "$f"; done
 echo "== seed.sql"; $PSQL -d "$DB" -f supabase/seed.sql
 $PSQL -d "$DB" -c "create extension if not exists pgtap"

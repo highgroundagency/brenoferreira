@@ -36,7 +36,7 @@ Convicção religiosa é dado sensível (art. 5º II; base legal: consentimento,
 ## Verificação
 
 ```
-supabase/tests/local/run.sh    # 16 suítes pgTAP (225 checks) em Postgres local, sem Docker
+supabase/local-harness/run.sh    # 16 suítes pgTAP (225 checks) em Postgres local, sem Docker
 pnpm vitest run                # 15 testes de domínio
 pnpm exec biome check .        # 126 arquivos
 pnpm build                     # build de produção

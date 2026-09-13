@@ -12,7 +12,7 @@ pnpm db:test                             # pgTAP (16 suítes)
 `seed.sql` grava `app_settings.edge_base_url` apontando para `http://host.docker.internal:54321/functions/v1`; ajuste se o Postgres do CLI não alcançar o host (Linux: `172.17.0.1`). Verifique os jobs com `select * from net._http_response order by created desc limit 5;` e `select * from cron.job;`.
 
 ## Local (sem Docker)
-`supabase/tests/local/run.sh` cria um banco em um Postgres 16 local com shim de `auth`/`vault`/`cron`/`net`, aplica migrations + seed e roda os pgTAP. Tipos: `python3 scripts/gen-types.py > lib/database.types.ts`.
+`supabase/local-harness/run.sh` cria um banco em um Postgres 16 local com shim de `auth`/`vault`/`cron`/`net`, aplica migrations + seed e roda os pgTAP. Tipos: `python3 scripts/gen-types.py > lib/database.types.ts`.
 
 ## Produção — estado atual (13/09/2026)
 
