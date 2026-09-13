@@ -1,30 +1,28 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/lib/database.types";
+import { requireSupabaseEnv } from "@/lib/supabase/env";
 
 /** Cliente de servidor (Server Components, Route Handlers, Server Actions). */
 export async function createClient() {
   const cookieStore = await cookies();
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            for (const { name, value, options } of cookiesToSet) {
-              cookieStore.set(name, value, options);
-            }
-          } catch {
-            // chamado de um Server Component: o middleware renova a sessão
+  const { url, key } = requireSupabaseEnv();
+  return createServerClient<Database>(url, key, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          for (const { name, value, options } of cookiesToSet) {
+            cookieStore.set(name, value, options);
           }
-        },
+        } catch {
+          // chamado de um Server Component: o middleware renova a sessão
+        }
       },
     },
-  );
+  });
 }
 
 export type Role = Database["public"]["Tables"]["profiles"]["Row"]["role"];
