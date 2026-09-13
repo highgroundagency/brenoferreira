@@ -64,9 +64,11 @@ def emit_table(name, cols, view=False):
 
 def functions():
     rows = q("""select json_build_object('name', p.proname, 'args', (
-                  select coalesce(json_agg(json_build_object('name', a.name, 'type', a.type, 'has_default', a.has_default) order by a.ord), '[]')
-                  from (select unnest(p.proargnames) as name, unnest(p.proargtypes::regtype[])::text as type, generate_series(1, p.pronargs) as ord,
-                               generate_series(1, p.pronargs) > p.pronargs - p.pronargdefaults as has_default) a),
+                  select coalesce(json_agg(json_build_object(
+                      'name', coalesce(p.proargnames[a.ord], 'arg' || a.ord),
+                      'type', a.typ::regtype::text,
+                      'has_default', a.ord > p.pronargs - p.pronargdefaults) order by a.ord), '[]')
+                  from unnest(p.proargtypes) with ordinality a(typ, ord)),
                 'returns', pg_get_function_result(p.oid))
                 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                 where n.nspname = 'public' and p.prokind = 'f' and pg_get_function_result(p.oid) <> 'trigger'
@@ -78,15 +80,15 @@ def functions():
         d = json.loads(r)
         if d["name"] in seen: continue
         seen.add(d["name"])
-        args = "; ".join(f"{a['name']}{'?' if a['has_default'] else ''}: {pgret(a['type'])}" for a in d["args"] if a["name"])
-        ret = d["returns"]
-        setof = ret.startswith("SETOF ")
-        rt = pgret(ret.replace("SETOF ", ""))
+        args = "; ".join(f"{a['name']}{'?' if a['has_default'] else ''}: {pgret(a['type'] or 'unknown')}" for a in d["args"] if a.get("name"))
+        ret = d["returns"] or "void"
+        setof = ret.startswith("SETOF ") or ret.startswith("TABLE")
+        rt = "Json" if ret.startswith("TABLE") else pgret(ret.replace("SETOF ", ""))
         out.append(f"      {d['name']}: {{ Args: {{ {args} }}; Returns: {rt}{'[]' if setof else ''} }};")
     return out
 
 def pgret(t):
-    t = t.strip()
+    t = (t or "unknown").strip()
     arr = t.endswith("[]")
     base = {"uuid": "string", "text": "string", "character": "string", "timestamp with time zone": "string", "date": "string",
             "integer": "number", "smallint": "number", "bigint": "number", "numeric": "number", "boolean": "boolean",

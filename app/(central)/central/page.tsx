@@ -34,6 +34,15 @@ export default async function CentralPage() {
           <Link className="underline" href="/central/estoque">
             Estoque
           </Link>
+          <Link className="underline" href="/central/eventos">
+            Eventos
+          </Link>
+          <Link className="underline" href="/central/mantenedores">
+            Mantenedores
+          </Link>
+          <Link className="underline" href="/central/beneficios">
+            Benefícios
+          </Link>
           <Link className="underline" href="/central/impacto">
             Impacto
           </Link>

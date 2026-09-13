@@ -1,7 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/convite", "/api/auth", "/termos", "/manifest.webmanifest", "/sw.js", "/icons"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/convite",
+  "/api/auth",
+  "/termos",
+  "/carteirinha",
+  "/manifest.webmanifest",
+  "/sw.js",
+  "/icons",
+];
 
 /** Renova a sessão e exige login fora das rotas públicas. O gate por papel fica nos layouts. */
 export async function updateSession(request: NextRequest) {

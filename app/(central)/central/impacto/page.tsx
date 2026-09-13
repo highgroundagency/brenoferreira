@@ -17,6 +17,11 @@ const LABELS: [string, string][] = [
   ["courses_completed", "Cursos concluídos"],
   ["people_hired", "Pessoas contratadas"],
   ["neighborhoods_reached", "Bairros alcançados"],
+  ["events_done", "Eventos realizados"],
+  ["event_checkins", "Presenças em eventos"],
+  ["active_supporters", "Mantenedores ativos"],
+  ["contributions_12m", "Contribuições (12 meses, R$)"],
+  ["benefit_redemptions", "Benefícios resgatados"],
 ];
 
 /** Relatório institucional (impressão = PDF pelo navegador). Números agregados por unidade; sem dados individuais. */
