@@ -71,6 +71,7 @@ export type Database = {
       v_impact_by_unit: { Row: { unit_id: string | null; unit_name: string | null; people_registered: number | null; decisions_without_record: number | null; journey_active: number | null; reached_day7: number | null; reached_day16: number | null; church_connected: number | null; families_in_food_program: number | null; food_baskets_delivered: number | null; home_items_delivered: number | null; courses_completed: number | null; people_hired: number | null; neighborhoods_reached: number | null; events_done: number | null; event_checkins: number | null; active_supporters: number | null; contributions_12m: number | null; benefit_redemptions: number | null; refreshed_at: string | null }; Relationships: [] };
       v_impact_public: { Row: { unit_id: string | null; neighborhood: string | null; decisions_total: number | null }; Relationships: [] };
       v_supporter_funnel: { Row: { unit_id: string | null; status: string | null; total: number | null; monthly_amount: number | null }; Relationships: [] };
+      v_units_comparison: { Row: { unit_id: string | null; slug: string | null; name: string | null; locale: string | null; active: boolean | null; members: number | null; neighborhoods: number | null; people_registered: number | null; decisions_without_record: number | null; journey_active: number | null; reached_day7: number | null; reached_day16: number | null; church_connected: number | null; food_baskets_delivered: number | null; courses_completed: number | null; people_hired: number | null; events_done: number | null; active_supporters: number | null; contributions_12m: number | null; pct_day7: number | null; created_at: string | null }; Relationships: [] };
     };
     Functions: {
       accept_invite: { Args: { p_code: string }; Returns: Json };
@@ -99,6 +100,7 @@ export type Database = {
       create_event: { Args: { p_name: string; p_kind?: string; p_neighborhood_id?: string; p_target_segment?: Json }; Returns: string };
       create_invite: { Args: { p_email: string; p_role: string; p_team_id?: string }; Returns: Json };
       create_supporter: { Args: { p_person_id?: string; p_status?: string; p_external?: Json }; Returns: string };
+      create_unit: { Args: { p_slug: string; p_name: string; p_city_name: string; p_state: string; p_ibge_code?: string; p_timezone?: string; p_locale?: string; p_country?: string }; Returns: string };
       delivery_transition: { Args: { p_delivery_id: string; p_to: string; p_note?: string }; Returns: undefined };
       enqueue_first_contact: { Args: { p_person_id: string }; Returns: string };
       enqueue_video1: { Args: { p_unit_id: string; p_person_id: string }; Returns: string };
@@ -119,6 +121,7 @@ export type Database = {
       handle_inbound: { Args: { p_unit_id: string; p_wa_id: string; p_phone_e164: string; p_kind: string; p_payload: Json }; Returns: Json };
       import_companies: { Args: { p_rows: Json; p_file_name?: string }; Returns: Json };
       import_legacy_people: { Args: { p_rows: Json; p_file_name?: string }; Returns: Json };
+      import_neighborhoods: { Args: { p_city_id: string; p_rows: Json; p_unit_id?: string }; Returns: Json };
       invite_to_event: { Args: { p_event_id: string; p_limit?: number }; Returns: Json };
       invoke_edge: { Args: { p_function: string }; Returns: undefined };
       is_team_kind: { Args: { p_kinds: string[] }; Returns: boolean };

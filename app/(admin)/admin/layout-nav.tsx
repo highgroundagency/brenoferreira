@@ -8,6 +8,7 @@ const LINKS = [
   ["/admin/marcos", "Marcos"],
   ["/admin/conteudo", "Conteúdo"],
   ["/admin/templates", "Templates"],
+  ["/admin/unidades", "Unidades"],
 ];
 
 export function AdminNav({ current }: { current: string }) {
