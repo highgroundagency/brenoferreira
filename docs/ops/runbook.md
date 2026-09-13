@@ -28,7 +28,9 @@ Projeto **`transtornar-prod`** (`afdxoqccmljjqdcofspi`, `sa-east-1`, plano Free 
 
 **Ainda falta ligar** (depende de credenciais que não estão neste repositório):
 
-1. Segredo compartilhado: rodar o workflow `deploy.yml` com os secrets do GitHub (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`, `EDGE_SHARED_SECRET`) — ele cria `vault.create_secret(..., 'edge_shared_secret')` e faz `supabase secrets set` com o mesmo valor. Enquanto os dois lados não tiverem o mesmo segredo, o cron recebe 401 e nada é enviado (é o comportamento desejado antes da WABA).
+1. Bearer das Edge Functions: **feito** — o segredo `edge_shared_secret` foi gerado dentro do banco e guardado no Vault. Falta só espelhá-lo no lado da função: Dashboard → Edge Functions → Secrets → `EDGE_SHARED_SECRET`, com o valor lido em Dashboard → SQL Editor:
+   `select decrypted_secret from vault.decrypted_secrets where name = 'edge_shared_secret';`
+   O workflow `deploy.yml` faz isso sozinho a cada deploy (lê do Vault e chama `supabase secrets set`), então esse passo manual só vale se você quiser ligar o envio antes do próximo deploy. Enquanto os dois lados não tiverem o mesmo valor, o cron recebe 401 e nada é enviado — que é o comportamento desejado antes da WABA.
 2. `supabase secrets set WHATSAPP_ACCESS_TOKEN=… WHATSAPP_APP_SECRET=… WHATSAPP_VERIFY_TOKEN=… WHATSAPP_API_VERSION=v24.0`.
 3. `update public.units set whatsapp_phone_number_id = '…', whatsapp_waba_id = '…' where slug = 'curitiba';` — sem isso o worker não tem unidade para processar.
 4. Webhook na Meta: `https://afdxoqccmljjqdcofspi.supabase.co/functions/v1/whatsapp-webhook`, verify token = `WHATSAPP_VERIFY_TOKEN`, campos `messages`, `message_template_status_update`, `template_category_update`, `phone_number_quality_update`.
@@ -49,9 +51,8 @@ curl -s -o /dev/null -w '%{http_code}\n' "$B/whatsapp-send"
 ## Produção (do zero, em outra unidade ou projeto)
 1. Projeto Supabase em `sa-east-1` (Free no desenvolvimento; Pro antes do piloto: timebox de sessão, sem pausa por inatividade, backups). Habilitar `pg_cron` e `pg_net` em Database → Extensions (a migration 001 cria se disponíveis).
 2. `supabase link --project-ref <ref>` → `supabase db push` → `supabase config push` (confirmação de e-mail desligada, timebox 720h, SMTP Resend em Auth → SMTP).
-3. `psql "$DATABASE_URL" -f supabase/seeds/prod.sql` (edge_base_url, vídeo 1, templates espelhados) e criação única do segredo:
-   `psql "$DATABASE_URL" -v secret="$EDGE_SHARED_SECRET" -c "select vault.create_secret(:'secret','edge_shared_secret') where not exists (select 1 from vault.secrets where name='edge_shared_secret')"`.
-4. `supabase secrets set EDGE_SHARED_SECRET=… WHATSAPP_ACCESS_TOKEN=… WHATSAPP_APP_SECRET=… WHATSAPP_VERIFY_TOKEN=… WHATSAPP_API_VERSION=v24.0` e `supabase functions deploy whatsapp-send whatsapp-webhook --no-verify-jwt`.
+3. `psql "$DATABASE_URL" -f supabase/seeds/prod.sql` (edge_base_url, vídeo 1, templates espelhados). O bearer das Edge Functions não precisa de passo manual: o `deploy.yml` gera no Vault se não existir e espelha nas funções.
+4. `supabase secrets set WHATSAPP_ACCESS_TOKEN=… WHATSAPP_APP_SECRET=… WHATSAPP_VERIFY_TOKEN=… WHATSAPP_API_VERSION=v24.0` e `supabase functions deploy whatsapp-send whatsapp-webhook --no-verify-jwt`.
 5. Bucket público `content` no Storage; `update units set whatsapp_phone_number_id=…, whatsapp_waba_id=… where slug='curitiba'`.
 6. Webhook na Meta (campos acima) e primeiro admin em `profiles`.
 7. Vercel: variáveis acima, região `gru1`.
@@ -62,6 +63,20 @@ curl -s -o /dev/null -w '%{http_code}\n' "$B/whatsapp-send"
 - Cron não chama a função: `select * from net._http_response order by created desc limit 5;` (401 = bearer do Vault ≠ `EDGE_SHARED_SECRET`).
 - Webhook: `select event_type, error, created_at from wa_inbound_events order by created_at desc limit 20;` (assinatura inválida → 401 nos logs da função).
 - Pessoa com telefone repetido: ficha → "Marcar duplicata" ou "Mesma casa, pessoa diferente".
+
+## Rotação do bearer das Edge Functions
+O Vault é a fonte única: o `deploy.yml` lê de lá e espelha nas Edge Functions, então não existe
+segredo equivalente no GitHub para sair do lugar. Para rotacionar, troque no Vault e rode o deploy:
+
+```sql
+select vault.update_secret(
+  (select id from vault.secrets where name = 'edge_shared_secret'),
+  encode(extensions.gen_random_bytes(32), 'hex')
+);
+```
+
+Entre a troca e o deploy seguinte, o `pg_cron` manda o bearer novo para uma função que ainda espera o
+antigo e os envios voltam 401 — visível em `select * from net._http_response order by created desc`.
 
 ## Advisors e endurecimento
 `get_advisors` (segurança e desempenho) roda no painel do Supabase e pelo MCP. O que já foi tratado:
