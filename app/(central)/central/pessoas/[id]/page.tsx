@@ -3,7 +3,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/require-role";
 import { STAFF_ROLES } from "@/lib/auth/roles";
-import { REFERRAL_TYPE_LABEL, STAGE_LABEL, STATUS_LABEL } from "@/lib/domain/referral-state";
+import {
+  MESSAGE_KIND_LABEL,
+  MESSAGE_STATUS_LABEL,
+  NEED_STATUS_LABEL,
+  NEED_TYPE_LABEL,
+  REFERRAL_TYPE_LABEL,
+  STAGE_LABEL,
+  STATUS_LABEL,
+} from "@/lib/domain/referral-state";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -188,8 +196,8 @@ export default async function PessoaPage({ params }: { params: Promise<{ id: str
         <CardContent className="flex flex-col gap-2 text-sm">
           {r.needs.map((n) => (
             <div key={n.id}>
-              {n.need_type}
-              {n.item_code ? ` (${n.item_code})` : ""} — {n.status}
+              {NEED_TYPE_LABEL[n.need_type] ?? n.need_type}
+              {n.item_code ? ` (${n.item_code})` : ""} — {NEED_STATUS_LABEL[n.status] ?? n.status}
               {n.raw_text ? ` — "${n.raw_text}"` : ""}
             </div>
           ))}
@@ -219,7 +227,7 @@ export default async function PessoaPage({ params }: { params: Promise<{ id: str
           ))}
           {r.messages.map((m) => (
             <div key={m.id}>
-              {m.template_name ?? m.kind} — {m.status}
+              {m.template_name ?? MESSAGE_KIND_LABEL[m.kind] ?? m.kind} — {MESSAGE_STATUS_LABEL[m.status] ?? m.status}
               {m.skip_reason ? ` (${m.skip_reason})` : ""}
               {m.error_code ? ` erro ${m.error_code}` : ""} · {fmt(m.sent_at ?? m.scheduled_for)}
             </div>

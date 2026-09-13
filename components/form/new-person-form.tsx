@@ -597,8 +597,13 @@ export function NewPersonForm({ neighborhoods, consent }: { neighborhoods: Neigh
         </div>
       ) : null}
 
-      {/* Rodapé fixo */}
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t bg-background/95 p-3 backdrop-blur">
+      {/*
+        Rodapé grudado, não fixo. Com `fixed` ele saía do fluxo e cobria para sempre o fim do
+        formulário ("Mais detalhes" ficava embaixo dele, sem como rolar), e no Safari do iOS
+        brigava com a barra que aparece e some — o botão pulava e exigia dois toques.
+        Com `sticky` ele acompanha a rolagem e, no fim da página, assenta depois do conteúdo.
+      */}
+      <div className="sticky bottom-0 z-10 -mx-4 mt-2 border-t bg-background/95 px-4 pt-3 backdrop-blur [padding-bottom:calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="mx-auto flex max-w-lg flex-col gap-2">
           <Button type="submit" size="lg" disabled={isMinor || !consentAccepted || submitting}>
             {t("form.submit")}
