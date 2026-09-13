@@ -10,7 +10,6 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
-      EDGE_SHARED_SECRET: ${{ secrets.EDGE_SHARED_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
@@ -18,10 +17,16 @@ jobs:
       - run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
       - run: supabase db push
       - run: supabase config push
-      - name: Segredo compartilhado das Edge Functions (criação única, fora do repo)
+      # O Vault é a fonte única do bearer: se não existir, nasce aqui, gerado dentro do banco
+      # (o valor nunca passa por este arquivo nem pelos logs). As Edge Functions recebem o mesmo
+      # valor lido de volta do Vault, então os dois lados não têm como divergir.
+      - name: Bearer das Edge Functions (Vault -> secrets da função)
         run: |
           DATABASE_URL="postgresql://postgres.${SUPABASE_PROJECT_REF}:${SUPABASE_DB_PASSWORD}@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
-          psql "$DATABASE_URL" -v secret="$EDGE_SHARED_SECRET" -c "select vault.create_secret(:'secret','edge_shared_secret') where not exists (select 1 from vault.secrets where name='edge_shared_secret')"
-      - run: supabase secrets set EDGE_SHARED_SECRET="$EDGE_SHARED_SECRET"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c "select vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'edge_shared_secret', 'bearer do pg_cron para whatsapp-send') where not exists (select 1 from vault.secrets where name = 'edge_shared_secret')" > /dev/null
+          SECRET=$(psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -t -A -c "select decrypted_secret from vault.decrypted_secrets where name = 'edge_shared_secret'")
+          echo "::add-mask::$SECRET"
+          test -n "$SECRET"
+          supabase secrets set EDGE_SHARED_SECRET="$SECRET"
       - run: supabase functions deploy whatsapp-send whatsapp-webhook --no-verify-jwt
   # Vercel faz o deploy do app por integração Git (região gru1); nada a fazer aqui.
