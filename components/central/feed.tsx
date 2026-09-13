@@ -75,7 +75,7 @@ export function Feed() {
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {needs.length ? (
-                    <Badge variant="warning">precisa: {needs.join(", ")}</Badge>
+                    <Badge variant="info">precisa: {needs.join(", ")}</Badge>
                   ) : (
                     <Badge variant="outline">sem necessidade declarada</Badge>
                   )}

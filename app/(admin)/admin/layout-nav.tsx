@@ -1,28 +1,17 @@
-import Link from "next/link";
+import { NavTabs } from "@/components/nav-tabs";
 
 const LINKS = [
-  ["/admin/usuarios", "Usuários"],
-  ["/admin/unidade", "Unidade"],
-  ["/admin/regras", "Roteamento"],
-  ["/admin/jornada", "Jornada"],
-  ["/admin/marcos", "Marcos"],
-  ["/admin/conteudo", "Conteúdo"],
-  ["/admin/templates", "Templates"],
-  ["/admin/unidades", "Unidades"],
+  { href: "/admin/usuarios", label: "Usuários" },
+  { href: "/admin/unidade", label: "Unidade" },
+  { href: "/admin/regras", label: "Roteamento" },
+  { href: "/admin/jornada", label: "Jornada" },
+  { href: "/admin/marcos", label: "Marcos" },
+  { href: "/admin/conteudo", label: "Conteúdo" },
+  { href: "/admin/templates", label: "Templates" },
+  { href: "/admin/unidades", label: "Unidades" },
 ];
 
-export function AdminNav({ current }: { current: string }) {
-  return (
-    <nav className="mb-4 flex flex-wrap gap-1 text-sm">
-      {LINKS.map(([href, label]) => (
-        <Link
-          key={href}
-          href={href}
-          className={`rounded-full border px-3 py-1 ${current === href ? "bg-primary text-primary-foreground" : ""}`}
-        >
-          {label}
-        </Link>
-      ))}
-    </nav>
-  );
+/** `current` continua aceito pelas páginas existentes, mas a aba ativa vem da rota. */
+export function AdminNav(_props: { current?: string } = {}) {
+  return <NavTabs tabs={LINKS} />;
 }
