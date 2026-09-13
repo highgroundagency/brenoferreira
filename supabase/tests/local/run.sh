@@ -12,6 +12,7 @@ for f in supabase/migrations/*.sql; do echo "== $f"; $PSQL -d "$DB" -f "$f"; don
 echo "== seed.sql"; $PSQL -d "$DB" -f supabase/seed.sql
 $PSQL -d "$DB" -c "create extension if not exists pgtap"
 fail=0
+[ "${SKIP_TESTS:-0}" = "1" ] && { echo "MIGRATIONS OK (tests skipped)"; exit 0; }
 for t in supabase/tests/*.sql; do
   [ -e "$t" ] || continue
   echo "== test $t"

@@ -167,6 +167,10 @@ create index person_events_person_idx on public.person_events (person_id, occurr
 create or replace function public.reject_change() returns trigger
 language plpgsql as $$
 begin
+  -- anonymize_person (security definer) pode limpar payloads: set_config('app.bypass_append_only','on', true)
+  if coalesce(current_setting('app.bypass_append_only', true), '') = 'on' then
+    return coalesce(new, old);
+  end if;
   raise exception '% is append-only', tg_table_name;
 end $$;
 create trigger person_events_append_only before update or delete on public.person_events for each row execute function public.reject_change();
