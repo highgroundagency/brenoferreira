@@ -78,6 +78,19 @@ select vault.update_secret(
 Entre a troca e o deploy seguinte, o `pg_cron` manda o bearer novo para uma função que ainda espera o
 antigo e os envios voltam 401 — visível em `select * from net._http_response order by created desc`.
 
+## Unidade de demonstração
+Existe uma unidade `demo` ("Transtornar Demonstração") com 10 pessoas fictícias, jornada em
+andamento, cestas, entregas, matrícula, contratação, igreja, evento de bairro disparado por meta e
+mantenedores — criada pelas próprias funções do sistema, para mostrar as telas com vida. Ela é
+isolada da unidade `curitiba` pela RLS: a conta de visualização não enxerga nenhuma pessoa real.
+
+Acesso: `demo@transtornar.app` (a senha fica fora do repositório; troque em Authentication → Users).
+Para remover tudo de uma vez, incluindo os usuários da demonstração:
+
+```sql
+delete from public.units where slug = 'demo';
+```
+
 ## Advisors e endurecimento
 `get_advisors` (segurança e desempenho) roda no painel do Supabase e pelo MCP. O que já foi tratado:
 
