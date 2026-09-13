@@ -11,12 +11,16 @@ const PUBLIC_PATHS = [
   "/manifest.webmanifest",
   "/sw.js",
   "/icons",
+  "/status",
 ];
 
 /** Renova a sessão e exige login fora das rotas públicas. O gate por papel fica nos layouts. */
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
+  // O diagnóstico passa antes de tudo: é ele que serve justamente quando a configuração está quebrada.
+  if (pathname === "/status") return NextResponse.next({ request });
 
   // Sem configuração não há como validar sessão. Responde explicando o que falta em vez de
   // derrubar o middleware (que vira um 500 branco em todas as rotas do site).
