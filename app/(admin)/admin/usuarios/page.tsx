@@ -1,3 +1,4 @@
+import { AdminNav } from "@/app/(admin)/admin/layout-nav";
 import { InviteForm } from "@/components/admin/invite-form";
 import { UserList } from "@/components/admin/user-list";
 import { createClient, getProfile } from "@/lib/supabase/server";
@@ -26,6 +27,7 @@ export default async function UsuariosPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <h1 className="text-xl font-bold">Usuários e convites</h1>
+      <AdminNav current="/admin/usuarios" />
       <InviteForm
         teams={(teams ?? []).map((t) => ({ id: t.id, name: t.name }))}
         pending={(invites ?? []).map((i) => ({ ...i, expires_at: i.expires_at }))}

@@ -96,18 +96,19 @@ export async function processUnit(
     try {
       const to = e164ToWa(m.to_phone_e164);
       let result: { providerMessageId: string; waId?: string };
+      let pricing: string | null = m.kind === "template" ? null : "service";
       if (m.kind === "template" && m.template_name) {
         const { data: tpl } = await supabase
           .from("message_templates")
-          .select("language, buttons, status")
+          .select("language, buttons, status, category")
           .eq("name", m.template_name)
           .or(`unit_id.eq.${m.unit_id},unit_id.is.null`)
           .order("unit_id", { nullsFirst: false })
           .limit(1)
           .maybeSingle();
         const buttons = ((tpl?.buttons as TemplateButton[] | null) ?? []) as TemplateButton[];
-        let headerVideoLink: string | undefined;
-        if (m.template_name === "transtornar_video1_v1") {
+        let headerVideoLink: string | undefined = (m.payload.header_video_link as string | undefined) || undefined;
+        if (m.template_name === "transtornar_video1_v1" && !headerVideoLink) {
           const { data: asset } = await supabase
             .from("content_assets")
             .select("public_url")
@@ -122,11 +123,15 @@ export async function processUnit(
             continue;
           }
         }
+        const bodyParams = Array.isArray(m.payload.body_params)
+          ? (m.payload.body_params as unknown[]).map(String)
+          : [String(m.payload.first_name ?? "")];
         result = await wa.sendTemplate(to, m.template_name, tpl?.language ?? "pt_BR", {
-          bodyParams: [String(m.payload.first_name ?? "")],
+          bodyParams,
           headerVideoLink,
           buttons,
         });
+        pricing = (tpl?.category as string | undefined)?.toLowerCase() ?? null;
       } else if (m.kind === "media") {
         const { data: asset } = await supabase
           .from("content_assets")
@@ -158,6 +163,7 @@ export async function processUnit(
           sent_at: new Date().toISOString(),
           provider_message_id: result.providerMessageId || null,
           attempts: m.attempts + 1,
+          pricing_category: pricing,
         })
         .eq("id", m.id);
       if (m.person_id) {

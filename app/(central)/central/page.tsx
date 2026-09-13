@@ -16,6 +16,12 @@ export default async function CentralPage() {
           <Link className="underline" href="/central/filas">
             {t("central.queues")}
           </Link>
+          <Link className="underline" href="/central/acompanhamento">
+            Acompanhamento
+          </Link>
+          <Link className="underline" href="/central/entregas">
+            Entregas
+          </Link>
           <Link className="underline" href="/central/bairros">
             {t("central.neighborhoods")}
           </Link>

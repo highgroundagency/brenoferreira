@@ -22,6 +22,9 @@ type Record_ = {
     wants_training: boolean | null;
     occupation_area: string | null;
     attends_church: boolean | null;
+    income_range: string | null;
+    profile_segment: string | null;
+    points: number;
   };
   contact: {
     full_name: string;
@@ -38,6 +41,7 @@ type Record_ = {
     whatsapp_valid: boolean | null;
   } | null;
   neighborhood: string | null;
+  assigned_name: string | null;
   children: { age_band: string }[];
   needs: { id: string; need_type: string; item_code: string | null; raw_text: string | null; status: string }[];
   consents: {
@@ -67,12 +71,56 @@ type Record_ = {
     scheduled_for: string;
     sent_at: string | null;
   }[];
+  journey: {
+    status: string;
+    current_sequence: number;
+    completed_steps: number;
+    started_at: string;
+    next_send_at: string | null;
+  } | null;
+  journey_progress: {
+    sequence: number;
+    title: string;
+    status: string;
+    sent_at: string | null;
+    watched_at: string | null;
+    feedback_score: number | null;
+    answer: string | null;
+  }[];
+  rewards: { item: string; name: string; earned_at: string; delivered_at: string | null }[];
+  follow_ups: {
+    id: string;
+    channel: string;
+    note: string;
+    member_name: string | null;
+    next_action_at: string | null;
+    done_at: string | null;
+    created_at: string;
+  }[];
+  programs: {
+    id: string;
+    program_type: string;
+    status: string;
+    start_date: string;
+    end_date: string;
+    planned_deliveries: number;
+    completed_deliveries: number;
+  }[];
+  deliveries: {
+    id: string;
+    kind: string;
+    item_code: string | null;
+    status: string;
+    scheduled_for: string;
+    delivered_at: string | null;
+    failure_reason: string | null;
+  }[];
 };
 
 const fmt = (iso: string) => new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 
 export default async function PessoaPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole(STAFF_ROLES);
+  const _profile = await requireRole(STAFF_ROLES);
   const { id } = await params;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("open_person_record", { p_person_id: id });
@@ -124,6 +172,11 @@ export default async function PessoaPage({ params }: { params: Promise<{ id: str
             {p.occupation_area ? ` · ${p.occupation_area}` : ""}
           </div>
           <div>Igreja: {p.attends_church ? "frequenta" : p.attends_church === false ? "não frequenta" : "—"}</div>
+          <div>
+            Renda: {p.income_range ? String(p.income_range).replace(/_/g, " ") : "—"} · Segmento:{" "}
+            {String(p.profile_segment ?? "—")}
+          </div>
+          <div>Responsável: {r.assigned_name ?? "—"}</div>
           {p.observation ? <div className="sm:col-span-2">Observação: {p.observation}</div> : null}
         </CardContent>
       </Card>

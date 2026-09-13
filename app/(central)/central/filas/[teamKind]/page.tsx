@@ -1,3 +1,4 @@
+import { LiveRefresh } from "@/components/central/live-refresh";
 import { type QueueItem, QueueList } from "@/components/central/queue-list";
 import { type Role, STAFF_ROLES } from "@/lib/auth/roles";
 import { createClient, getProfile } from "@/lib/supabase/server";
@@ -24,6 +25,7 @@ export default async function FilaPage({ params }: { params: Promise<{ teamKind:
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="mb-3 text-xl font-bold">Fila — {KIND_LABEL[teamKind] ?? teamKind}</h1>
+      <LiveRefresh tables={["referrals"]} />
       <QueueList items={items} canOpenRecord={STAFF_ROLES.includes((profile?.role ?? "") as Role)} />
     </div>
   );
